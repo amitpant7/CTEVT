@@ -10,7 +10,7 @@ import mediapipe as mp
 max_size_form = 300 # in kib
 max_size_id = 300 #
 max_size_exp = 300
-rotate = True      #rotate twice or not
+rotate = False      #rotate twice or not
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')   #face detection algo
 
 
@@ -74,23 +74,28 @@ def extract_photo(image):
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
     face = False
+    image_h, image_w = image.shape[:2]
 
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
         gray_photo = gray[y:y+h, x:x+w]
         faces = face_cascade.detectMultiScale(gray_photo, scaleFactor=1.1, minNeighbors=5, minSize=(10, 10))
         
-        if len(faces)>=1 and (200 < w < 500 and 200 < h < 500):
+        if len(faces)>=1 and (0.07*image_w < w < 0.2*image_w and 0.07*image_h < h < 0.2*image_h):
             passport_photo = image[y:y+h, x:x+w]
             passport_photo = cv2.resize(passport_photo, (192, 192),interpolation=cv2.INTER_LANCZOS4)
             face = True
             break
 
     if not face:
-        passport_photo = np.random.randint(0, 10, (192, 192))
+        passport_photo = np.random.randint(0, 10, (192, 192, 3))
 
-    passport_photo = align_face(passport_photo)
-    cv2.imwrite('photo.jpg', passport_photo)
+
+    if face:
+        passport_photo = align_face(passport_photo)
+    
+    
+    return face, passport_photo
     
     
     
@@ -118,7 +123,7 @@ def compress_image(image, output_path, max_size_kb, initial_quality=90, step=5):
     return False
 
 
-def process_folder(input_path = '.'):
+def process_folder(input_path):
     
     all_files = []
     for root, dirs, files in os.walk(input_path): 
@@ -128,6 +133,8 @@ def process_folder(input_path = '.'):
             
             
     for p in tqdm(all_files, desc="Processing images"):
+                
+            parent = os.path.dirname(p)
             img = cv2.imread(p)
              
             if rotate:
@@ -136,28 +143,34 @@ def process_folder(input_path = '.'):
             if p.endswith('form.jpg'): 
                 form_img = img
                 ##extract person photo 
-                extract_photo(form_img)
+                sucess, photo = extract_photo(form_img)
+                
+                if not sucess:
+                    print('Could not detect face for :', parent)
+                    
+                else:
+                    cv2.imwrite(os.path.join(parent, 'photo.jpg'), photo)
                 
                 ## compress and save the form
                 
-                compress_path = os.path.join(root, 'form_c.jpg')
+                compress_path = os.path.join(parent, 'form_c.jpg')
                 
                 sucess = compress_image(form_img, compress_path, max_size_kb=max_size_form)
                 
                 if not sucess:
-                    print('Form compression failed for ', {root}, ' perfrom Manually')
+                    print('Form compression failed for ', {parent}, ' perfrom Manually')
                     
                     
             
             if p.endswith('id.jpg'):
-                compress_path = os.path.join(root, 'id_c.jpg')
-                sucess = compress_image(form_img, compress_path, max_size_kb=max_size_id)
+                compress_path = os.path.join(parent, 'id_c.jpg')
+                sucess = compress_image(img, compress_path, max_size_kb=max_size_id)
                 
                 
                         
             if p.endswith('exp.jpg'):
-                compress_path = os.path.join(root, 'exp_c.jpg')
-                sucess = compress_image(form_img, compress_path, max_size_kb=max_size_exp)
+                compress_path = os.path.join(parent, 'exp_c.jpg')
+                sucess = compress_image(img, compress_path, max_size_kb=max_size_exp)
                 
                 
                 
@@ -168,7 +181,7 @@ if __name__ == "__main__":
     if len(args)>1:
         print('-----------Starting Image compression and Extraction------------------')
         dir_path = args[1]
-        process_folder(args)
+        process_folder(input_path=dir_path)
         print('----------------Compression and Extraction compelete---------------')
     
     
