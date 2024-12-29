@@ -4,7 +4,7 @@ import sys
 import numpy as np
 from tqdm import tqdm
 import mediapipe as mp
-
+import warnings
 
 #defining the parametes 
 max_size_form = 300 # in kib
@@ -16,6 +16,12 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 
 ## Naming conventions:
 ## use id.jpg for citizenship, form.jpg for form and exp.jpg for experience.
+
+
+
+
+# Suppress all warnings of a specific type
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def align_face(image):
@@ -83,19 +89,21 @@ def extract_photo(image):
         
         if len(faces)>=1 and (0.07*image_w < w < 0.2*image_w and 0.07*image_h < h < 0.2*image_h):
             passport_photo = image[y:y+h, x:x+w]
+            passport_photo_2 = image[y-50:y+h+50, x-50:x+w+50]
             passport_photo = cv2.resize(passport_photo, (192, 192),interpolation=cv2.INTER_LANCZOS4)
             face = True
             break
 
     if not face:
         passport_photo = np.random.randint(0, 10, (192, 192, 3))
+        passport_photo_2 = np.random.randint(0, 10, (192, 192, 3))
 
 
     if face:
         passport_photo = align_face(passport_photo)
     
     
-    return face, passport_photo
+    return face, passport_photo, passport_photo_2
     
     
     
@@ -114,7 +122,7 @@ def compress_image(image, output_path, max_size_kb, initial_quality=90, step=5):
 
         current_size_kb = os.path.getsize(output_path) / 1024
         
-        if current_size_kb <= max_size_kb:
+        if current_size_kb <= max_size_kb-10:
             return True
 
 
@@ -143,13 +151,14 @@ def process_folder(input_path):
             if p.endswith('form.jpg'): 
                 form_img = img
                 ##extract person photo 
-                sucess, photo = extract_photo(form_img)
+                sucess, photo, photo2 = extract_photo(form_img)
                 
                 if not sucess:
                     print('Could not detect face for :', parent)
                     
                 else:
                     cv2.imwrite(os.path.join(parent, 'photo.jpg'), photo)
+                    cv2.imwrite(os.path.join(parent, 'zzz_backup.jpg'), photo2)
                 
                 ## compress and save the form
                 
