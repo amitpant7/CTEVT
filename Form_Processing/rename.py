@@ -45,5 +45,9 @@ for dir_path in directories:
 
     sorted_dict = {key: numbers[key] for key in sorted(numbers)}
 
-    for i, path in enumerate(sorted_dict.values()):
-        shutil.move(os.path.join(dir_path, path), os.path.join(dir_path, order[i]))
+    try:
+        for i, path in enumerate(sorted_dict.values()):
+            shutil.move(os.path.join(dir_path, path), os.path.join(dir_path, order[i]))
+    except Exception as e:
+        print('Maybe you have more than 3 images, {e}, Continuing the renaming')
+

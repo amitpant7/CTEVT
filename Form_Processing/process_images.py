@@ -157,8 +157,11 @@ def process_folder(input_path):
                     print('Could not detect face for :', parent)
                     
                 else:
-                    cv2.imwrite(os.path.join(parent, 'photo.jpg'), photo)
-                    cv2.imwrite(os.path.join(parent, 'zzz_backup.jpg'), photo2)
+                    try:
+                        cv2.imwrite(os.path.join(parent, 'photo.jpg'), photo)
+                        cv2.imwrite(os.path.join(parent, 'zzz_backup.jpg'), photo2)
+                    except:
+                        pass
                 
                 ## compress and save the form
                 

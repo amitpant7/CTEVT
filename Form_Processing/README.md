@@ -19,6 +19,12 @@
    - **Form Image**: `form.jpg`
    - **Experience Image**: `exp.jpg`
 
+   If images don't follow this convention, and follow the ordering during scanning process run `rename.py` to fix the file naming.
+   
+   ```bash 
+   python rename.py individual_folder
+   ```
+
 #### Features
 - **Image Compression**:
   Compresses images (`id.jpg`, `form.jpg`, `exp.jpg`) to specified file size limits.
