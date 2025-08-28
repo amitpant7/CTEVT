@@ -245,4 +245,4 @@ if __name__ == "__main__":
         process_folder(input_path=dir_path, model_path=model_path)
         print('----------------Compression and Extraction complete---------------')
     else:
-        print("Usage: python script.py <input_directory> <model_path>")
+        print("Usage: python script.py <input_directory>")

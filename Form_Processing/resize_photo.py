@@ -2,8 +2,8 @@ import cv2
 import glob
 
 size = (192, 192)
-input_dir = 'RPL_processed1'
-all_person_photos = glob.glob(f'{input_dir}/**/zzz_backup.jpg', recursive=True)
+input_dir = 'photo'
+all_person_photos = glob.glob(f'{input_dir}/**/photo.jpg', recursive=True)
 
 for path in all_person_photos:
     image = cv2.imread(path)
