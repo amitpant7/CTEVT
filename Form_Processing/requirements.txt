@@ -1,5 +1,0 @@
-numpy
-tensorflow
-mediapipe
-opencv-python
-tqdm 
