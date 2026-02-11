@@ -11,6 +11,15 @@ import warnings
 from PIL import Image
 from ultralytics import YOLO
 
+
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # Disable CUDA
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'   # Suppress TensorFlow logs
+
+# For MediaPipe to use CPU only
+os.environ['MEDIAPIPE_DISABLE_GPU'] = '1'
+cv2.setLogLevel(0)  # Suppress OpenCV warnings
+
 # Previous parameters remain the same...
 max_size_form = 300 
 max_size_id = 300
